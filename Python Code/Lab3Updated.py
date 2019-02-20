@@ -7,16 +7,13 @@ import numpy as np
 
 States = [];  #declaring an empty array for the possible amount of states
 
-#initializing the possible states for a 6x6 grid
 
-L = 6; # Size of grid
-W = 6;
+for x in [0, 1, 2, 3, 4, 5] : #Three for loops to create all possible states and store them in a single list States
 
-head = 12;
+    for y in [0,1,2,3,4,5]:
 
-for x in range(L): #Three for loops to create all possible states and store them in a single list States
-    for y in range(W):
-        for h in range(head):
+        for h in [0,1,2,3,4,5,6,7,8,9,10,11]:
+
             States.append((x,y,h));
 
 #2.1 (b) Creating the action space
@@ -125,8 +122,7 @@ def probability(pe,s,a,sp):
     else:
         prob[s] = 1
 
-   # for n in prob.keys():
-    #    print(n)
+ 
 
     if sp in prob.keys():
      #   print("here")
@@ -134,13 +130,33 @@ def probability(pe,s,a,sp):
     else:
       #  print("here else")
         return 0.0
-s = (0,3,4)
-sp = (0,3,4)
+s = (0,2,1)
+sp = (0,2,1)
 
 for a in Actions:
-    pr = probability(0.2,s,a,sp)
-    print("action:",a)
-    print("pr:", pr)
+    p = probability(0.2,s,a,sp)
+    if (a[0] == 0 and  a[1] == 0):
+        print ("Singular Action: No Movement and No Turn")
+        print("Probability: ", p)
+    if  (a[0] == 1 and a[1] == 0):
+        print ("Singular Action: Forward and No Turn")
+        print("Probability: ", p)
+    if (a[0] == 1 and  a[1] == 1):
+        print ("Singular Action: Forward and Right Turn")
+        print("Probability: ", p)
+    if (a[0] == 1 and  a[1] == -1):
+        print ("Singular Action: Forward and Left Turn")
+        print("Probability: ", p)
+    if (a[0] == -1 and  a[1] == 0):
+        print ("Singular Action: Backward and No Turn")
+        print("Probability: ", p)
+    if (a[0] == -1 and  a[1] == -1):
+        print ("Singular Action: Backward and Left Turn")
+        print("Probability: ", p)
+    if (a[0] == -1 and  a[1] == 1):
+        print ("Singular Action: Backward and Right Turn")
+        print("Probability: ", p)
+  
 
 
 
@@ -236,8 +252,28 @@ def sprime (s,a):
 s = (2,2,2)
 for a in Actions: 
     P = sprime(s, a) 
-    print("action:",a) 
-    print(P)
+
+    if (a[0] == 0 and  a[1] == 0):
+        print ("Singular Action: No Movement and No Turn")
+        print("Probability: ", P)
+    if  (a[0] == 1 and a[1] == 0):
+        print ("Singular Action: Forward and No Turn")
+        print("Probability: ", P)
+    if (a[0] == 1 and  a[1] == 1):
+        print ("Singular Action: Forward and Right Turn")
+        print("Probability: ", P)
+    if (a[0] == 1 and  a[1] == -1):
+        print ("Singular Action: Forward and Left Turn")
+        print("Probability: ", P)
+    if (a[0] == -1 and  a[1] == 0):
+        print ("Singular Action: Backward and No Turn")
+        print("Probability: ", P)
+    if (a[0] == -1 and  a[1] == -1):
+        print ("Singular Action: Backward and Left Turn")
+        print("Probability: ", P)
+    if (a[0] == -1 and  a[1] == 1):
+        print ("Singular Action: Backward and Right Turn")
+        print("Probability: ", P)
 
 
 #2.2-------------------------------------------------------------
@@ -245,6 +281,7 @@ for a in Actions:
 
 #2.3 (a)
 
+#Setting the rewards function
 def reward(s):
     red = -100
     yellow = -10
@@ -275,15 +312,16 @@ def reward(s):
 policy = {}
 for s in States:
    
-    goal_dir = [4-s[0], 4-s[1]]
+    direc = [4-s[0], 4-s[1]] #A heading direction pointing towards the goal
+
     
-   
-    if goal_dir == [0, 0]:
+   #Settingt the appropriate directions for forwards nd backwards direction accroding to heading
+    if direc == [0, 0]:
         policy[s] = (0, 0)
         
    
-    if s[2] in [2, 3, 4]:
-        if (goal_dir[0]>=0 or goal_dir[1]==0):
+    if s[2] in [2, 3, 4]: #YOU CAN USE VECTORS IN PYTHON FOR FOR LOOPS! (A.P)
+        if (direc[0]>=0 or direc[1]==0):
             move = 1; #Forwards
         else:
             
@@ -291,7 +329,7 @@ for s in States:
         
   
     if s[2] in [8, 9, 10]:
-        if (goal_dir[0]<=0 or goal_dir[1]==0):
+        if (direc[0]<=0 or direc[1]==0):
             move = 1; #Forwards
             
         else:
@@ -299,26 +337,27 @@ for s in States:
         
  
     if s[2] in [11, 0, 1]:
-        if (goal_dir[1]>=0 or goal_dir[0]==0):
+        if (direc[1]>=0 or direc[0]==0):
             move = 1; #Forwards
         else:
             move = -1; #Backwards
    
     if s[2] in [5, 6, 7]:
-        if (goal_dir[1]<=0 or goal_dir[0]==0):
+        if (direc[1]<=0 or direc[0]==0):
             move = 1; #Forwards
         else:
             move = -1; #Backwards
     
   
-    theta = np.arctan2(goal_dir[1], goal_dir[0])*180/np.pi
-    angle_diff = s[2]*30-(90 - theta)
-    if (angle_diff > 0) and (angle_diff < 180):
+    angle = np.arctan2(direc[1], direc[0]) * (180/(np.pi))
+    delAngle = (s[2]*30)-(90 - angle)
+    
+    if (delAngle > 0) and (delAngle < 180):
         turn = -1
-    elif (angle_diff == 0) or (angle_diff == 180):
+    elif (delAngle == 0) or (delAngle == 180):
         turn = 0
     else:
-        turn = 1
+        turn = 
         
     policy[s] = (move, turn)
     
